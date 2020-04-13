@@ -16,9 +16,9 @@ ItemStack.getI18NDisplayName()
 
 | 指令  | 说明 | 需要权限 |
 | :----- | :-------------- | :---- |
-| `chanlang reload`| 重载配置和语言文件，需要权限 | `chanlang.reload`<br>
-|`chanlang clearall`| 重载配置和语言文件，需要权限|`chanlang.clearall`<br>
-|`chanlang test`| 测试语言文件指令， 需要权限|`chanlang.test`
+| `chanlang reload`| 重载配置和语言文件 | `chanlang.reload`<br>
+|`chanlang clearall`| 重载配置和语言文件 |`chanlang.clearall`<br>
+|`chanlang test`| 测试语言文件指令|`chanlang.test`
 
 ##开发文档
 ```java
@@ -28,7 +28,7 @@ import cn.whiteg.chanlang.LangUtils;
         //获取物品的名称
         LangUtils.getItemDisplayName(ItemStack item);
         //获取物品语言文件内的名称
-        LangUtils.getItemDisplayName(ItemStack item);
+        LangUtils.getI18NDisplayName(ItemStack item);
         //获取物品类型的名称
         LangUtils.getMaterialName(Material mat);
         //获取实体名称
