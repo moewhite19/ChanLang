@@ -5,16 +5,20 @@
 修改后控制台内提示信息也都会变成制定语言<br>
 
 对插件开发者来说<br>
-插件获取物品名称直接使用BukkitAPI里的
+可以直接使用本插件的API或者直接使用PaperAPI里的
 ```java
 ItemStack.getI18NDisplayName()
 ```
-即可获取到指定语言的物品名称<br>
+翻译后的的物品名称<br>
 无需再额外添加语言文件去翻译物品名称也能省下不少事
+
 ##指令以及使用权限
-`chanlang reload` 重载配置和语言文件，需要权限`chanlang.reload`<br>
-`chanlang clearall` 重载配置和语言文件，需要权限`chanlang.clearall`<br>
-`chanlang test` 测试语言文件指令， 需要权限`chanlang.test`
+
+| 指令  | 说明 | 需要权限 |
+| :----- | :-------------- | :---- |
+| `chanlang reload`| 重载配置和语言文件，需要权限 | `chanlang.reload`<br>
+|`chanlang clearall`| 重载配置和语言文件，需要权限|`chanlang.clearall`<br>
+|`chanlang test`| 测试语言文件指令， 需要权限|`chanlang.test`
 
 ##开发文档
 ```java
