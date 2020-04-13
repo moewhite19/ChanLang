@@ -46,10 +46,6 @@ import cn.whiteg.chanlang.LangUtils;
         
         //使用key直接从语言文件里获取值
         LangUtils.getMessage(String key);
-       
-       
-  
-}
 ```
 
 
