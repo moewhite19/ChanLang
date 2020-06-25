@@ -42,7 +42,7 @@ public class test extends CommandInterface {
 
         sender.sendMessage("\n实体名");
         for (EntityType type : EntityType.values()) {
-            World world = Bukkit.getWorlds().get(0);
+            //World world = Bukkit.getWorlds().get(0);
             sender.sendMessage(LangUtils.getEntityTypeName(type));
         }
 
