@@ -1,18 +1,15 @@
 package cn.whiteg.chanlang;
 
-import com.google.common.collect.Maps;
+import cn.whiteg.chanlang.allNms.nms;
+import cn.whiteg.chanlang.allNms.nms_v1_16_R1;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import net.minecraft.server.v1_16_R1.ChatDeserializer;
-import net.minecraft.server.v1_16_R1.LocaleLanguage;
 import org.bukkit.Bukkit;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.*;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -23,8 +20,6 @@ import java.util.regex.Pattern;
 
 
 public class ChanLang extends JavaPlugin {
-    private static final String serverVersion;
-    private static final Pattern pattern = Pattern.compile("%(\\d+\\$)?[\\d\\.]*[df]");
     public static Logger logger;
     public static ChanLang plugin;
     private static Map<String, String> map;
@@ -34,6 +29,8 @@ public class ChanLang extends JavaPlugin {
         serverVersion = packageName.substring(packageName.lastIndexOf('.') + 1);
     }
 
+    private static final String serverVersion;
+
     public CommandManage mainCommand;
     public Setting setting;
 
@@ -41,18 +38,12 @@ public class ChanLang extends JavaPlugin {
         plugin = this;
     }
 
-    public static Class getNmsClass(String name) throws ClassNotFoundException {
-        return Class.forName("net.minecraft.server." + serverVersion + "." + name);
-    }
 
     @SuppressWarnings("unchecked")
     public static Map<String, String> getLangMap() {
         return map;
     }
 
-    public static String getServerVersion() {
-        return serverVersion;
-    }
 
     public void onLoad() {
         saveDefaultConfig();
@@ -79,80 +70,17 @@ public class ChanLang extends JavaPlugin {
         } else {
             logger.info("没用注册指令(忘记添加指令到plugin.yml啦?)");
         }
-        Class localeLanguageClass;
-        try{
-            localeLanguageClass = getNmsClass("LocaleLanguage");
-            Method getLocaleLanguage = localeLanguageClass.getMethod("a");
-            getLocaleLanguage.setAccessible(true);
-            Object ll = getLocaleLanguage.invoke(null);
-            logger.info("ServerVersion: " + serverVersion);
-            if ("v1_16_R1".equals(serverVersion)){
-                try{
-                    map = Maps.newHashMap();
-                    InputStream inputstream = LocaleLanguage.class.getResourceAsStream("/assets/minecraft/lang/en_us.json");
-                    Throwable throwable = null;
 
-                    try{
-                        JsonElement jsonelement = (new Gson()).fromJson(new InputStreamReader(inputstream,StandardCharsets.UTF_8),JsonElement.class);
-                        JsonObject jsonobject = ChatDeserializer.m(jsonelement,"strings");
-                        Iterator iterator = jsonobject.entrySet().iterator();
-                        while (iterator.hasNext()) {
-                            Map.Entry<String, JsonElement> entry = (Map.Entry) iterator.next();
-                            String s = pattern.matcher(ChatDeserializer.a((JsonElement) entry.getValue(),(String) entry.getKey())).replaceAll("%$1s");
-                            map.put(entry.getKey(),s);
-                        }
-                    }catch (Throwable var16){
-                        throwable = var16;
-                        throw var16;
-                    } finally {
-                        if (inputstream != null){
-                            if (throwable != null){
-                                try{
-                                    inputstream.close();
-                                }catch (Throwable var15){
-                                    throwable.addSuppressed(var15);
-                                }
-                            } else {
-                                inputstream.close();
-                            }
-                        }
-                    }
-
-
-                    Field f = localeLanguageClass.getDeclaredField("d");
-                    f.setAccessible(true);
-                    f.set(null,new LocaleLanguage() {
-                        @Override
-                        public String a(String s) {
-                            return map.get(s);
-                        }
-
-                        @Override
-                        public boolean b(String s) {
-                            return map.containsKey(s);
-                        }
-
-                        @Override
-                        public String a(String s,boolean b) {
-                            return s;
-                        }
-                    });
-
-                }catch (IOException e){
-                    e.printStackTrace();
-                }
-            } else {
-                //1.15或者更低获取的map
-                Field mapField = localeLanguageClass.getDeclaredField("d");
-                mapField.setAccessible(true);
-                map = (Map<String, String>) mapField.get(ll);
-            }
-        }catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException | NoSuchFieldException e){
-            e.printStackTrace();
-            logger.warning("not support version " + serverVersion);
-            map = Maps.newHashMap();
-            return;
+        nms n;
+        if (serverVersion.equals("v1_16_R1")){
+            n = new nms_v1_16_R1(this);
+        } else {
+            n = new nms(this);
         }
+        map = n.getMap();
+
+
+        //储存默认语言
         File landDir = new File(getDataFolder(),"langs");
         if (!landDir.isDirectory()){
             landDir.mkdirs();
@@ -181,6 +109,8 @@ public class ChanLang extends JavaPlugin {
                 }
             }
         }
+
+        //设置语言
         File landFile = new File(landDir,setting.land + ".json");
         if (landFile.exists()){
             try{
@@ -205,6 +135,10 @@ public class ChanLang extends JavaPlugin {
         setting.reload();
         onEnable();
         logger.info("--重载完成--");
+    }
+
+    public void saveDefaultLang(){
+
     }
 
     @SuppressWarnings("unchecked")
@@ -255,5 +189,14 @@ public class ChanLang extends JavaPlugin {
         }catch (Exception e){
             e.printStackTrace();
         }
+    }
+
+    public static String getServerVersion() {
+        return serverVersion;
+    }
+
+
+    public static Class<?> getNmsClass(String name) throws ClassNotFoundException {
+        return Class.forName("net.minecraft.server." + getServerVersion() + "." + name);
     }
 }
