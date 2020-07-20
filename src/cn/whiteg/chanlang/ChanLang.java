@@ -92,21 +92,25 @@ public class ChanLang extends JavaPlugin {
 
 
         //储存默认语言
-        File landDir = new File(getDataFolder(),"langs");
-        saveDefaultLang();
+        File langDir = new File(getDataFolder(),"langs");
+        saveDefaultLang(langDir);
 
         //设置语言
-        File landFile = new File(landDir,setting.land + ".json");
-        if (landFile.exists()){
-            try{
-                loadFile(new FileInputStream(landFile));
-                logger.info("已设置语言为" + setting.land);
-            }catch (FileNotFoundException e){
-                e.printStackTrace();
+        for (int i = setting.land.size() - 1; i >= 0; i--) {
+            String land = setting.land.get(i);
+            File langFile = new File(langDir,land + ".json");
+            if (langFile.exists()){
+                try{
+                    loadFile(new FileInputStream(langFile));
+                    logger.info("Load lang " + land);
+                }catch (FileNotFoundException e){
+                    e.printStackTrace();
+                }
+            } else {
+                logger.warning("Lang not fount " + langFile.getName());
             }
-        } else {
-            logger.warning("语言文件不存在" + landFile.toString());
         }
+
         logger.info("全部加载完成");
     }
 
@@ -122,11 +126,10 @@ public class ChanLang extends JavaPlugin {
         logger.info("--重载完成--");
     }
 
-    public void saveDefaultLang() {
+    public void saveDefaultLang(File langDir) {
         //储存默认语言
-        File landDir = new File(getDataFolder(),"langs");
-        if (!landDir.isDirectory()){
-            landDir.mkdirs();
+        if (!langDir.isDirectory()){
+            langDir.mkdirs();
             String[] langs = new String[]{"en_us","zh_cn"};
             for (String lang : langs) {
                 try{
@@ -135,7 +138,7 @@ public class ChanLang extends JavaPlugin {
                     URL url = getClass().getClassLoader().getResource("langs/" + name);
                     if (url == null) continue;
                     InputStream is = url.openStream();
-                    File file = new File(landDir,name);
+                    File file = new File(langDir,name);
                     if (!file.createNewFile()){
                         continue;
                     }

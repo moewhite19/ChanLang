@@ -1,6 +1,8 @@
 #配置文件版本
-var: 1
+ver: 2
 #语言
-land: zh_cn
+lang-list:
+  - zh_cn
+  - en_us
 #debug
 debug: false
