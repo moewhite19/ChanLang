@@ -96,8 +96,8 @@ public class ChanLang extends JavaPlugin {
         saveDefaultLang(langDir);
 
         //设置语言
-        for (int i = setting.land.size() - 1; i >= 0; i--) {
-            String land = setting.land.get(i);
+        for (int i = setting.lang.size() - 1; i >= 0; i--) {
+            String land = setting.lang.get(i);
             File langFile = new File(langDir,land + ".json");
             if (langFile.exists()){
                 try{

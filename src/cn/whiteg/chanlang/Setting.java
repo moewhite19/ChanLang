@@ -12,12 +12,14 @@ import java.util.Set;
 public class Setting {
     public static int VER = 2;
     public FileConfiguration config;
-    public List<String> land = Arrays.asList("zh_cn","en_us");
+    public List<String> lang = Arrays.asList("zh_cn","en_us");
     public boolean debug = false;
 
     public void reload() {
         File file = new File(ChanLang.plugin.getDataFolder(),"config.yml");
         config = YamlConfiguration.loadConfiguration(file);
+
+        //更新配置
         if (config.getInt("ver") != VER){
             ChanLang.logger.info("更新配置文件");
             ChanLang.plugin.saveResource("config.yml",true);
@@ -35,7 +37,8 @@ public class Setting {
                 e.printStackTrace();
             }
         }
+
         debug = config.getBoolean("debug");
-        land = config.getStringList("land-list");
+        lang = config.getStringList("lang-list");
     }
 }
