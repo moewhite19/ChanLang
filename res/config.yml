@@ -2,3 +2,5 @@
 var: 1
 #语言
 land: zh_cn
+#debug
+debug: false

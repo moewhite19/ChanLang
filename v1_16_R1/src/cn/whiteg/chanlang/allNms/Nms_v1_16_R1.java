@@ -17,11 +17,11 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-public class nms_v1_16_R1 extends nms {
+public class Nms_v1_16_R1 extends Nms_Reflect {
 
 
     private Map<String, String> map;
-    public nms_v1_16_R1(ChanLang chanLang) {
+    public Nms_v1_16_R1(ChanLang chanLang) {
         super(chanLang);
     }
 
@@ -36,11 +36,11 @@ public class nms_v1_16_R1 extends nms {
                 try{
                     JsonElement jsonelement = (new Gson()).fromJson(new InputStreamReader(inputstream,StandardCharsets.UTF_8),JsonElement.class);
                     JsonObject jsonobject = ChatDeserializer.m(jsonelement,"strings");
-                    Iterator iterator = jsonobject.entrySet().iterator();
+                    Iterator<Map.Entry<String, JsonElement>> iterator = jsonobject.entrySet().iterator();
                     while (iterator.hasNext()) {
-                        Map.Entry<String, JsonElement> entry = (Map.Entry) iterator.next();
+                        Map.Entry<String, JsonElement> entry = iterator.next();
                         Pattern pattern = Pattern.compile("%(\\d+\\$)?[\\d\\.]*[df]");
-                        String s = pattern.matcher(ChatDeserializer.a((JsonElement) entry.getValue(),(String) entry.getKey())).replaceAll("%$1s");
+                        String s = pattern.matcher(ChatDeserializer.a(entry.getValue(),entry.getKey())).replaceAll("%$1s");
                         map.put(entry.getKey(),s);
                     }
                 }catch (Throwable var16){
@@ -89,4 +89,5 @@ public class nms_v1_16_R1 extends nms {
         }
         return map;
     }
+
 }

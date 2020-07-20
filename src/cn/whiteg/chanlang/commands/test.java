@@ -35,8 +35,6 @@ public class test extends CommandInterface {
 //
         sender.sendMessage("\nmat物品名\n");
         for (Material value : Material.values()) {
-//            ItemStack itemstack = new ItemStack(value);
-//            sender.sendMessage(LangUtils.getI18NDisplayName(itemstack, "\nerrrrrrrrrrrrrrrrrrrrrrrrrrrrr"));
             sender.sendMessage(LangUtils.getMaterialName(value));
         }
 

@@ -1,7 +1,8 @@
 package cn.whiteg.chanlang;
 
-import cn.whiteg.chanlang.allNms.nms;
-import cn.whiteg.chanlang.allNms.nms_v1_16_R1;
+import cn.whiteg.chanlang.allNms.Nms;
+import cn.whiteg.chanlang.allNms.Nms_Reflect;
+import cn.whiteg.chanlang.allNms.Nms_v1_16_R1;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -20,16 +21,16 @@ import java.util.regex.Pattern;
 
 
 public class ChanLang extends JavaPlugin {
+    private static final String serverVersion;
     public static Logger logger;
     public static ChanLang plugin;
     private static Map<String, String> map;
+    private static Nms nms;
 
     static {
         String packageName = Bukkit.getServer().getClass().getPackage().getName();
         serverVersion = packageName.substring(packageName.lastIndexOf('.') + 1);
     }
-
-    private static final String serverVersion;
 
     public CommandManage mainCommand;
     public Setting setting;
@@ -44,6 +45,17 @@ public class ChanLang extends JavaPlugin {
         return map;
     }
 
+    public static String getServerVersion() {
+        return serverVersion;
+    }
+
+    public static Class<?> getNmsClass(String name) throws ClassNotFoundException {
+        return Class.forName("net.minecraft.server." + getServerVersion() + "." + name);
+    }
+
+    public static Nms getNms() {
+        return nms;
+    }
 
     public void onLoad() {
         saveDefaultConfig();
@@ -71,15 +83,46 @@ public class ChanLang extends JavaPlugin {
             logger.info("没用注册指令(忘记添加指令到plugin.yml啦?)");
         }
 
-        nms n;
         if (serverVersion.equals("v1_16_R1")){
-            n = new nms_v1_16_R1(this);
+            nms = new Nms_v1_16_R1(this);
         } else {
-            n = new nms(this);
+            nms = new Nms_Reflect(this);
         }
-        map = n.getMap();
+        map = nms.getMap();
 
 
+        //储存默认语言
+        File landDir = new File(getDataFolder(),"langs");
+        saveDefaultLang();
+
+        //设置语言
+        File landFile = new File(landDir,setting.land + ".json");
+        if (landFile.exists()){
+            try{
+                loadFile(new FileInputStream(landFile));
+                logger.info("已设置语言为" + setting.land);
+            }catch (FileNotFoundException e){
+                e.printStackTrace();
+            }
+        } else {
+            logger.warning("语言文件不存在" + landFile.toString());
+        }
+        logger.info("全部加载完成");
+    }
+
+    public void onDisable() {
+        //注销所有监听器
+        logger.info("插件已关闭");
+    }
+
+    public void onReload() {
+        logger.info("--开始重载--");
+        setting.reload();
+        onEnable();
+        logger.info("--重载完成--");
+    }
+
+    public void saveDefaultLang() {
         //储存默认语言
         File landDir = new File(getDataFolder(),"langs");
         if (!landDir.isDirectory()){
@@ -109,46 +152,15 @@ public class ChanLang extends JavaPlugin {
                 }
             }
         }
-
-        //设置语言
-        File landFile = new File(landDir,setting.land + ".json");
-        if (landFile.exists()){
-            try{
-                setLand(new FileInputStream(landFile));
-                logger.info("已设置语言为" + setting.land);
-            }catch (FileNotFoundException e){
-                e.printStackTrace();
-            }
-        } else {
-            logger.warning("语言文件不存在" + landFile.toString());
-        }
-        logger.info("全部加载完成");
-    }
-
-    public void onDisable() {
-        //注销所有监听器
-        logger.info("插件已关闭");
-    }
-
-    public void onReload() {
-        logger.info("--开始重载--");
-        setting.reload();
-        onEnable();
-        logger.info("--重载完成--");
-    }
-
-    public void saveDefaultLang(){
-
     }
 
     @SuppressWarnings("unchecked")
-    public void setLand(InputStream inputstream) {
+    public void loadFile(InputStream inputstream) {
         String nmsPack = "net.minecraft.server." + serverVersion;
         Map<String, String> map;
         Method ccm;
         Method cca;
         try{
-//            Class<? extends ChatDeserializer> chatDeserializerClass = ChatDeserializer.class;
             map = getLangMap();
             Class chatDeserializerClass = Class.forName(nmsPack + ".ChatDeserializer");
             ccm = chatDeserializerClass.getMethod("m",JsonElement.class,String.class);
@@ -191,12 +203,4 @@ public class ChanLang extends JavaPlugin {
         }
     }
 
-    public static String getServerVersion() {
-        return serverVersion;
-    }
-
-
-    public static Class<?> getNmsClass(String name) throws ClassNotFoundException {
-        return Class.forName("net.minecraft.server." + getServerVersion() + "." + name);
-    }
 }

@@ -8,29 +8,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffectType;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-
 public class LangUtils {
-    static private Method getItemMethod;
-    static private Method getBlockMethod;
-    static private Method itemGetNameMethod;
-    static private Method blockGetItem;
-
-    static {
-        try{
-            Class craftMagicNumbersClass = Class.forName("org.bukkit.craftbukkit." + ChanLang.getServerVersion() + ".util.CraftMagicNumbers");
-            getItemMethod = craftMagicNumbersClass.getMethod("getItem",Material.class);
-            getBlockMethod = craftMagicNumbersClass.getMethod("getBlock",Material.class);
-
-            itemGetNameMethod = ChanLang.getNmsClass("Item").getMethod("getName");
-            blockGetItem = ChanLang.getNmsClass("Block").getMethod("getItem");
-        }catch (ClassNotFoundException | NoSuchMethodException e){
-            e.printStackTrace();
-        }
-
-    }
-
     /**
      * 获取附魔效果名称
      *
@@ -78,15 +56,12 @@ public class LangUtils {
      * @return 名称
      */
     public static String getMaterialName(Material mat) {
-        try{
-            Object item = getNmsItem(mat);
-            if (item == null){
-                return mat.name();
-            }
-            return getMessage((String) itemGetNameMethod.invoke(item));
-        }catch (IllegalAccessException | InvocationTargetException e){
-            e.printStackTrace();
+        Object item = ChanLang.getNms().getNmsItem(mat);
+        if (item == null){
+            return mat.name();
         }
+        String key = ChanLang.getNms().getItemName(item);
+        if (key != null) return getMessage(key);
         return mat.name();
     }
 
@@ -98,15 +73,12 @@ public class LangUtils {
      * @return 名称
      */
     public static String getMaterialName(Material mat,String def) {
-        try{
-            Object item = getNmsItem(mat);
-            if (item == null){
-                return def;
-            }
-            return getMessage((String) itemGetNameMethod.invoke(item));
-        }catch (IllegalAccessException | InvocationTargetException e){
-            e.printStackTrace();
+        Object item = ChanLang.getNms().getNmsItem(mat);
+        if (item == null){
+            return def;
         }
+        String key = ChanLang.getNms().getItemName(item);
+        if (key != null) return getMessage(key);
         return def;
     }
 
@@ -151,7 +123,7 @@ public class LangUtils {
      */
     public static String getEntityTypeName(EntityType type) {
         try{
-            return getMessage("entity.minecraft." + type.getKey().getKey());
+            return getMessage("entity." + type.getKey().getNamespace() + "." + type.getKey().getKey());
         }catch (IllegalArgumentException e){
             return type.name();
         }
@@ -159,6 +131,7 @@ public class LangUtils {
 
     /**
      * 获取实体名称
+     *
      * @param entity 实体
      * @return 如果实体有自定义名称就返回名称，没有就返回实体类型名称
      */
@@ -166,22 +139,6 @@ public class LangUtils {
         String custName = entity.getCustomName();
         if (custName == null) getEntityTypeName(entity.getType());
         return custName;
-    }
-
-    public static Object getNmsItem(Material mat) {
-        try{
-            Object item = getItemMethod.invoke(null,mat);
-            if (item == null){
-                Object block = getBlockMethod.invoke(null,mat);
-                if (block != null){
-                    return blockGetItem.invoke(block);
-                }
-            }
-            return item;
-        }catch (IllegalAccessException | InvocationTargetException e){
-            e.printStackTrace();
-        }
-        return null;
     }
 
     /**
