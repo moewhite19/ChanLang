@@ -40,7 +40,6 @@ public class ChanLang extends JavaPlugin {
     }
 
 
-    @SuppressWarnings("unchecked")
     public static Map<String, String> getLangMap() {
         return map;
     }
@@ -61,15 +60,6 @@ public class ChanLang extends JavaPlugin {
         saveDefaultConfig();
         logger = getLogger();
         setting = new Setting();
-//        saveResource("lands",false);
-//        try{
-//            Enumeration<URL> res = getClass().getClassLoader().getResources("langs");
-//            while (res.hasMoreElements()) {
-//                logger.info("资源" + res.nextElement());
-//            }
-//        }catch (IOException e){
-//            e.printStackTrace();
-//        }
     }
 
     public void onEnable() {
@@ -89,28 +79,7 @@ public class ChanLang extends JavaPlugin {
             nms = new Nms_Reflect(this);
         }
         map = nms.getMap();
-
-
-        //储存默认语言
-        File langDir = new File(getDataFolder(),"langs");
-        saveDefaultLang(langDir);
-
-        //设置语言
-        for (int i = setting.lang.size() - 1; i >= 0; i--) {
-            String land = setting.lang.get(i);
-            File langFile = new File(langDir,land + ".json");
-            if (langFile.exists()){
-                try{
-                    loadFile(new FileInputStream(langFile));
-                    logger.info("Load lang " + land);
-                }catch (FileNotFoundException e){
-                    e.printStackTrace();
-                }
-            } else {
-                logger.warning("Lang not fount " + langFile.getName());
-            }
-        }
-
+        onReload();
         logger.info("全部加载完成");
     }
 
@@ -120,10 +89,28 @@ public class ChanLang extends JavaPlugin {
     }
 
     public void onReload() {
-        logger.info("--开始重载--");
+        logger.info("--开始加载--");
+        //储存默认语言
+        File langDir = new File(getDataFolder(),"langs");
+        saveDefaultLang(langDir);
         setting.reload();
-        onEnable();
-        logger.info("--重载完成--");
+        //设置语言
+        for (int i = setting.lang.size() - 1; i >= 0; i--) { //从末尾往头遍历
+            String lang = setting.lang.get(i);
+            File langFile = new File(langDir,lang + ".json");
+            if (langFile.exists()){
+                try{
+                    loadFile(new FileInputStream(langFile));
+                    logger.info("Load lang " + lang);
+                }catch (FileNotFoundException e){
+                    e.printStackTrace();
+                }
+            } else {
+                logger.warning("Lang not fount " + langFile.getName());
+            }
+        }
+
+        logger.info("--加载完成--");
     }
 
     public void saveDefaultLang(File langDir) {
