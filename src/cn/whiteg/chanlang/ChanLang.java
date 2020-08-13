@@ -3,6 +3,7 @@ package cn.whiteg.chanlang;
 import cn.whiteg.chanlang.allNms.Nms;
 import cn.whiteg.chanlang.allNms.Nms_Reflect;
 import cn.whiteg.chanlang.allNms.Nms_v1_16_R1;
+import cn.whiteg.chanlang.allNms.Nms_v1_16_R2;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -73,11 +74,18 @@ public class ChanLang extends JavaPlugin {
             logger.info("没用注册指令(忘记添加指令到plugin.yml啦?)");
         }
 
-        if (serverVersion.equals("v1_16_R1")){
-            nms = new Nms_v1_16_R1(this);
-        } else {
-            nms = new Nms_Reflect(this);
+        switch (serverVersion) {
+            case "v1_16_R2":
+                nms = new Nms_v1_16_R2(this);
+                break;
+            case "v1_16_R1":
+                nms = new Nms_v1_16_R1(this);
+                break;
+            default:
+                nms = new Nms_Reflect(this);
+                break;
         }
+
         map = nms.getMap();
         onReload();
         logger.info("全部加载完成");
