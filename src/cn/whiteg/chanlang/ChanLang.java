@@ -1,9 +1,6 @@
 package cn.whiteg.chanlang;
 
-import cn.whiteg.chanlang.allNms.Nms;
-import cn.whiteg.chanlang.allNms.Nms_Reflect;
-import cn.whiteg.chanlang.allNms.Nms_v1_16_R1;
-import cn.whiteg.chanlang.allNms.Nms_v1_16_R2;
+import cn.whiteg.chanlang.allNms.*;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -75,6 +72,9 @@ public class ChanLang extends JavaPlugin {
         }
 
         switch (serverVersion) {
+            case "v1_16_R3":
+                nms = new Nms_v1_16_R3(this);
+                break;
             case "v1_16_R2":
                 nms = new Nms_v1_16_R2(this);
                 break;

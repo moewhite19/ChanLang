@@ -9,9 +9,8 @@ import org.bukkit.entity.Player;
 import java.util.*;
 
 public class CommandManage extends CommandInterface {
-    final public List<String> allCmd = Arrays.asList("reload","clearall", "test");
+    final public List<String> allCmd = Arrays.asList("reload","clearall","test");
     final public Map<String, CommandInterface> commandMap = new HashMap<>(allCmd.size());
-    final public SubCommand subCommand = new SubCommand(this);
 
     public CommandManage() {
         for (String cmd : allCmd) {
@@ -70,8 +69,16 @@ public class CommandManage extends CommandInterface {
             sender.sendMessage("§2[§b" + ChanLang.plugin.getName() + "§2]");
             return true;
         }
-        if (commandMap.containsKey(args[0])){
-            return commandMap.get(args[0]).onCommand(sender,cmd,label,args);
+
+        CommandInterface subCommand = commandMap.get(args[0]);
+        if (subCommand != null){
+            if (args.length > 1){
+                String[] subArgs = new String[args.length - 1];
+                System.arraycopy(args,1,subArgs,0,subArgs.length);
+                return subCommand.onCommand(sender,cmd,label,subArgs);
+            } else {
+                return subCommand.onCommand(sender,cmd,label,new String[]{});
+            }
         } else {
             sender.sendMessage("无效指令");
         }
@@ -80,52 +87,20 @@ public class CommandManage extends CommandInterface {
 
     @Override
     public List<String> onTabComplete(CommandSender sender,Command cmd,String label,String[] args) {
-        if (args.length > 1){
-            List ls = null;
-            if (commandMap.containsKey(args[0])) ls = commandMap.get(args[0]).onTabComplete(sender,cmd,label,args);
-            if (ls != null){
-                return getMatches(args[args.length - 1],ls);
-            }
-        }
-        for (int i = 0; i < args.length; i++) {
-            args[i] = args[i].toLowerCase();
-        }
         if (args.length == 1){
-            return getMatches(args[0],allCmd);
+            return getMatches(args[0].toLowerCase(),allCmd);
+        } else if (args.length > 1){
+            CommandInterface subCommand = commandMap.get(args[0]);
+            if (subCommand != null){
+                String[] subArgs = new String[args.length - 1];
+                System.arraycopy(args,1,subArgs,0,subArgs.length);
+                return subCommand.onTabComplete(sender,cmd,label,subArgs);
+            }
         }
         return null;
     }
 
     public void regCommand(String var1,CommandInterface cmd) {
         commandMap.put(var1,cmd);
-    }
-
-    public static class SubCommand extends CommandInterface {
-        private final CommandManage commandManage;
-
-        public SubCommand(CommandManage commandManage) {
-            this.commandManage = commandManage;
-        }
-
-        @Override
-        public boolean onCommand(CommandSender commandSender,Command command,String s,String[] strings) {
-            CommandInterface ci = commandManage.commandMap.get(command.getName());
-            if (ci == null) return false;
-            String[] args = new String[strings.length + 1];
-            args[0] = command.getName();
-            System.arraycopy(strings,0,args,1,strings.length);
-            ci.onCommand(commandSender,command,s,args);
-            return true;
-        }
-
-        @Override
-        public List<String> onTabComplete(CommandSender commandSender,Command command,String s,String[] strings) {
-            CommandInterface ci = commandManage.commandMap.get(command.getName());
-            if (ci == null) return null;
-            String[] args = new String[strings.length + 1];
-            args[0] = command.getName();
-            System.arraycopy(strings,0,args,1,strings.length);
-            return ci.onTabComplete(commandSender,command,s,args);
-        }
     }
 }
