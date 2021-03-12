@@ -2,9 +2,7 @@ package cn.whiteg.chanlang.commands;
 
 import cn.whiteg.chanlang.CommandInterface;
 import cn.whiteg.chanlang.LangUtils;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.enchantments.Enchantment;
@@ -14,12 +12,12 @@ import org.bukkit.potion.PotionEffectType;
 import java.util.List;
 
 public class test extends CommandInterface {
+    String persession = "chanlang.test";
 
     @Override
     public boolean onCommand(CommandSender sender,Command cmd,String label,String[] args) {
-        String p = "chanlang.test";
-        if (!sender.hasPermission(p)){
-            sender.sendMessage("§aNo Permission§f" + p);
+        if (!sender.hasPermission(persession)){
+            sender.sendMessage("§aNo Permission§f" + persession);
             return true;
         }
         sender.sendMessage("\n附魔\n");
@@ -50,5 +48,10 @@ public class test extends CommandInterface {
     @Override
     public List<String> onTabComplete(CommandSender sender,Command cmd,String label,String[] args) {
         return null;
+    }
+
+    @Override
+    public boolean canUseCommand(CommandSender sender) {
+        return sender.hasPermission(persession);
     }
 }

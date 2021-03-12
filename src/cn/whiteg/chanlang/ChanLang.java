@@ -5,7 +5,6 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import org.bukkit.Bukkit;
-import org.bukkit.command.PluginCommand;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.*;
@@ -13,6 +12,7 @@ import java.lang.reflect.Method;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
@@ -62,15 +62,8 @@ public class ChanLang extends JavaPlugin {
 
     public void onEnable() {
         logger.info("开始加载插件");
-        PluginCommand pc = getCommand("chanlang");
-        if (pc != null){
-            mainCommand = new CommandManage();
-            pc.setExecutor(mainCommand);
-            pc.setTabCompleter(mainCommand);
-        } else {
-            logger.info("没用注册指令(忘记添加指令到plugin.yml啦?)");
-        }
-
+        mainCommand = new CommandManage(this);
+        mainCommand.setExecutor();
         switch (serverVersion) {
             case "v1_16_R3":
                 nms = new Nms_v1_16_R3(this);
@@ -125,29 +118,38 @@ public class ChanLang extends JavaPlugin {
         //储存默认语言
         if (!langDir.isDirectory()){
             langDir.mkdirs();
+            try{
+                List<String> urls = PluginUtil.getUrls(getClassLoader(),false);
+                for (String url : urls) {
+                    if (url.startsWith("langs/")){
+                        try{
+                            logger.info("Save Lang: " + url);
+                            URL uri = getClass().getClassLoader().getResource(url);
+                            if (uri == null) continue;
+                            InputStream is = uri.openStream();
+                            File file = new File(langDir,url.substring(url.lastIndexOf('/') + 1));
+                            if (!file.createNewFile()){
+                                continue;
+                            }
+                            OutputStream os = new FileOutputStream(file);
+                            int bytesRead;
+                            byte[] buffer = new byte[1024];
+                            while ((bytesRead = is.read(buffer,0,buffer.length)) != -1) {
+                                os.write(buffer,0,bytesRead);
+                            }
+                            os.close();
+                            is.close();
+                        }catch (Exception e){
+                            e.printStackTrace();
+                        }
+
+                    }
+                }
+            }catch (IOException e){
+                e.printStackTrace();
+            }
             String[] langs = new String[]{"en_us","zh_cn"};
             for (String lang : langs) {
-                try{
-                    String name = lang + ".json";
-                    logger.info("Save Lang: " + name);
-                    URL url = getClass().getClassLoader().getResource("langs/" + name);
-                    if (url == null) continue;
-                    InputStream is = url.openStream();
-                    File file = new File(langDir,name);
-                    if (!file.createNewFile()){
-                        continue;
-                    }
-                    OutputStream os = new FileOutputStream(file);
-                    int bytesRead;
-                    byte[] buffer = new byte[1024];
-                    while ((bytesRead = is.read(buffer,0,buffer.length)) != -1) {
-                        os.write(buffer,0,bytesRead);
-                    }
-                    os.close();
-                    is.close();
-                }catch (Exception e){
-                    e.printStackTrace();
-                }
             }
         }
     }

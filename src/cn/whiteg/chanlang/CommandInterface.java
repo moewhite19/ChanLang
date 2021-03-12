@@ -12,9 +12,7 @@ import java.util.Collection;
 import java.util.List;
 
 public abstract class CommandInterface implements CommandExecutor, TabCompleter {
-    public CommandInterface() {
 
-    }
 
     public static List<String> getMatches(String[] args,List<String> list) {
         return getMatches(args[args.length - 1],list);
@@ -29,7 +27,7 @@ public abstract class CommandInterface implements CommandExecutor, TabCompleter 
     }
 
     public static List<String> getMatches(String value,List<String> list) {
-        List<String> result = new ArrayList<>();
+        List<String> result = new ArrayList<>(list.size());
         for (int i = 0; i < list.size(); i++) {
             String str = list.get(i).intern().toLowerCase();
             if (str.startsWith(value.toLowerCase())){
@@ -50,7 +48,23 @@ public abstract class CommandInterface implements CommandExecutor, TabCompleter 
         return PlayersList(arg[arg.length - 1]);
     }
 
+    @Override
     public List<String> onTabComplete(CommandSender sender,Command cmd,String label,String[] args) {
         return PlayersList(args);
+    }
+
+    //获取指令名称
+    public String getName() {
+        return getClass().getSimpleName();
+    }
+
+    //获取指令介绍
+    public String getDescription() {
+        return "";
+    }
+
+    //发送者是否可以使用指令
+    public boolean canUseCommand(CommandSender sender) {
+        return true;
     }
 }

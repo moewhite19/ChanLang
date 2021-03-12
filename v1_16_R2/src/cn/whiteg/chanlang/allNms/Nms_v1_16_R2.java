@@ -21,6 +21,7 @@ public class Nms_v1_16_R2 extends Nms_Reflect {
 
 
     private Map<String, String> map;
+
     public Nms_v1_16_R2(ChanLang chanLang) {
         super(chanLang);
     }
@@ -60,13 +61,12 @@ public class Nms_v1_16_R2 extends Nms_Reflect {
                     }
                 }
 
-                Class<?> localeLanguageClass = ChanLang.getNmsClass("LocaleLanguage");
-                Field f = localeLanguageClass.getDeclaredField("d");
+                Field f = LocaleLanguage.class.getDeclaredField("d");
                 f.setAccessible(true);
                 f.set(null,new LocaleLanguage() {
                     @Override
                     public String a(String s) {
-                        return map.get(s);
+                        return map.getOrDefault(s,s);
                     }
 
                     @Override

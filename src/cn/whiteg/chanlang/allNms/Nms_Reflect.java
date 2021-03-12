@@ -20,7 +20,7 @@ public class Nms_Reflect implements Nms {
     public Nms_Reflect(ChanLang chanLang) {
         this.plugin = chanLang;
         try{
-            Class craftMagicNumbersClass = Class.forName("org.bukkit.craftbukkit." + ChanLang.getServerVersion() + ".util.CraftMagicNumbers");
+            Class<?> craftMagicNumbersClass = Class.forName("org.bukkit.craftbukkit." + ChanLang.getServerVersion() + ".util.CraftMagicNumbers");
             getItemMethod = craftMagicNumbersClass.getMethod("getItem",Material.class);
             getBlockMethod = craftMagicNumbersClass.getMethod("getBlock",Material.class);
 
@@ -35,7 +35,7 @@ public class Nms_Reflect implements Nms {
     //1.15或者更低获取的map
     public Map<String, String> getMap() {
         try{
-            Class localeLanguageClass = ChanLang.getNmsClass("LocaleLanguage");
+            Class<?> localeLanguageClass = ChanLang.getNmsClass("LocaleLanguage");
             Method getLocaleLanguage = localeLanguageClass.getMethod("a");
             getLocaleLanguage.setAccessible(true);
             Object ll = getLocaleLanguage.invoke(null);
