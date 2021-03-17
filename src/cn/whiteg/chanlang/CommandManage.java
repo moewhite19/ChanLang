@@ -55,7 +55,7 @@ public class CommandManage extends CommandInterface {
                             registerCommand(ci);
                         }
                     }catch (ClassNotFoundException | InvocationTargetException | InstantiationException | IllegalAccessException e){
-                        plugin.getLogger().warning("无法构建指令: " + path);
+                        plugin.getLogger().warning("unable to build command: " + path);
                         e.printStackTrace();
                     }
                 }
@@ -81,7 +81,7 @@ public class CommandManage extends CommandInterface {
                 return subCommand.onCommand(sender,cmd,label,new String[]{});
             }
         } else {
-            sender.sendMessage("无效指令");
+            sender.sendMessage("Invalid Command");
         }
         return false;
     }

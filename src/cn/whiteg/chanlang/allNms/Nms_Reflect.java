@@ -44,7 +44,7 @@ public class Nms_Reflect implements Nms {
             return (Map<String, String>) mapField.get(ll);
         }catch (Exception e){
             if (plugin.setting.debug) e.printStackTrace();
-            //如果失败了返回一个空map
+            //如果失败了返回一个空map,表示仅保留API功能
             return new HashMap<>();
         }
     }

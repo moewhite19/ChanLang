@@ -4,6 +4,7 @@ import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffectType;
@@ -136,9 +137,27 @@ public class LangUtils {
      * @return 如果实体有自定义名称就返回名称，没有就返回实体类型名称
      */
     public static String getEntityName(Entity entity) {
-        String custName = entity.getCustomName();
-        if (custName == null) getEntityTypeName(entity.getType());
-        return custName;
+        String name = getEntityCustomName(entity);
+        if (name == null) return getEntityTypeName(entity.getType());
+        return name;
+    }
+
+
+    /**
+     * 获取实体或者玩家自定义名称名称
+     *
+     * @param entity 实体
+     * @return 如果实体有自定义名称如果没有就返回null
+     */
+    public static String getEntityCustomName(Entity entity) {
+        if (entity instanceof Player){
+            return ((Player) entity).getDisplayName();
+        }
+        String name = entity.getCustomName();
+        if (name != null && !name.isEmpty()){
+            return name;
+        }
+        return null;
     }
 
     /**
