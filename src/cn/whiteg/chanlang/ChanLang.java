@@ -1,14 +1,15 @@
 package cn.whiteg.chanlang;
 
-import cn.whiteg.chanlang.allNms.*;
+import cn.whiteg.chanlang.allNms.Nms;
+import cn.whiteg.chanlang.allNms.Nms_Reflect;
+import cn.whiteg.chanlang.allNms.Nms_v1_17_R1;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import net.minecraft.util.ChatDeserializer;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.*;
-import java.lang.reflect.Method;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
@@ -64,15 +65,10 @@ public class ChanLang extends JavaPlugin {
         logger.info("开始加载插件");
         mainCommand = new CommandManage(this);
         mainCommand.setExecutor();
+
         switch (serverVersion) {
-            case "v1_16_R3":
-                nms = new Nms_v1_16_R3(this);
-                break;
-            case "v1_16_R2":
-                nms = new Nms_v1_16_R2(this);
-                break;
-            case "v1_16_R1":
-                nms = new Nms_v1_16_R1(this);
+            case "v1_17_R1":
+                nms = new Nms_v1_17_R1(this);
                 break;
             default:
                 nms = new Nms_Reflect(this);
@@ -156,50 +152,28 @@ public class ChanLang extends JavaPlugin {
 
     @SuppressWarnings("unchecked")
     public void loadFile(InputStream inputstream) {
-        String nmsPack = "net.minecraft.server." + serverVersion;
         Map<String, String> map;
-        Method ccm;
-        Method cca;
+        map = getLangMap();
         try{
-            map = getLangMap();
-            Class chatDeserializerClass = Class.forName(nmsPack + ".ChatDeserializer");
-            ccm = chatDeserializerClass.getMethod("m",JsonElement.class,String.class);
-            cca = chatDeserializerClass.getMethod("a",JsonElement.class,String.class);
-        }catch (ClassNotFoundException | NoSuchMethodException e){
-            e.printStackTrace();
-            logger.warning("not support version " + serverVersion);
-            return;
-        }
-        try{
-            Throwable throwable = null;
-            try{
-                Pattern b = Pattern.compile("%(\\d+\\$)?[\\d\\.]*[df]");
-                JsonElement jsonelement = new Gson().fromJson(new InputStreamReader(inputstream,StandardCharsets.UTF_8),JsonElement.class);
-                JsonObject jsonobject = (JsonObject) ccm.invoke(null,jsonelement,"strings");
-                Iterator<Map.Entry<String, JsonElement>> iterator = jsonobject.entrySet().iterator();
-                while (iterator.hasNext()) {
-                    Map.Entry<String, JsonElement> entry = iterator.next();
-                    String s = b.matcher((CharSequence) cca.invoke(null,entry.getValue(),entry.getKey())).replaceAll("%$1s");
-                    map.put(entry.getKey(),s);
-                }
-            }catch (Throwable throwable1){
-                throwable = throwable1;
-                throw throwable1;
-            } finally {
-                if (inputstream != null){
-                    if (throwable != null){
-                        try{
-                            inputstream.close();
-                        }catch (Throwable throwable2){
-                            throwable.addSuppressed(throwable2);
-                        }
-                    } else {
-                        inputstream.close();
-                    }
+            Pattern b = Pattern.compile("%(\\d+\\$)?[\\d\\.]*[df]");
+            JsonElement jsonelement = new Gson().fromJson(new InputStreamReader(inputstream,StandardCharsets.UTF_8),JsonElement.class);
+            var jsonObject = ChatDeserializer.m(jsonelement,"strings");
+//                JsonObject jsonobject = (JsonObject) ccm.invoke(null,jsonelement,"strings");
+            Iterator<Map.Entry<String, JsonElement>> iterator = jsonObject.entrySet().iterator();
+            while (iterator.hasNext()) {
+                Map.Entry<String, JsonElement> entry = iterator.next();
+                var s = b.matcher(ChatDeserializer.a(entry.getValue(),entry.getKey())).replaceAll("%$1s");
+//                    String s = b.matcher((CharSequence) cca.invoke(null,entry.getValue(),entry.getKey())).replaceAll("%$1s");
+                map.put(entry.getKey(),s);
+            }
+        } finally {
+            if (inputstream != null){
+                try{
+                    inputstream.close();
+                }catch (IOException e){
+                    e.printStackTrace();
                 }
             }
-        }catch (Exception e){
-            e.printStackTrace();
         }
     }
 

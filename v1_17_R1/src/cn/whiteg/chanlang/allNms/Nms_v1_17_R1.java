@@ -5,8 +5,12 @@ import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import net.minecraft.server.v1_16_R2.ChatDeserializer;
-import net.minecraft.server.v1_16_R2.LocaleLanguage;
+import net.minecraft.locale.LocaleLanguage;
+import net.minecraft.network.chat.ChatModifier;
+import net.minecraft.network.chat.IChatFormatted;
+import net.minecraft.util.ChatDeserializer;
+import net.minecraft.util.FormattedString;
+import net.minecraft.util.StringDecomposer;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -15,18 +19,17 @@ import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
-public class Nms_v1_16_R2 extends Nms_Reflect {
-
-
+public class Nms_v1_17_R1 extends Nms_Reflect {
     private Map<String, String> map;
 
-    public Nms_v1_16_R2(ChanLang chanLang) {
+    public Nms_v1_17_R1(ChanLang chanLang) {
         super(chanLang);
     }
 
-    //1.16获取map
+    //1.17获取map
     public Map<String, String> getMap() {
         if (map != null) return map;
         try{
@@ -61,7 +64,7 @@ public class Nms_v1_16_R2 extends Nms_Reflect {
                     }
                 }
 
-                Field f = LocaleLanguage.class.getDeclaredField("d");
+                Field f = LocaleLanguage.class.getDeclaredField("e");
                 f.setAccessible(true);
                 f.set(null,new LocaleLanguage() {
                     @Override
@@ -72,6 +75,20 @@ public class Nms_v1_16_R2 extends Nms_Reflect {
                     @Override
                     public boolean b(String s) {
                         return map.containsKey(s);
+                    }
+
+                    @Override
+                    public boolean b() {
+                        return false;
+                    }
+
+                    @Override
+                    public FormattedString a(IChatFormatted iChatFormatted) {
+                        return (var1) -> {
+                            return iChatFormatted.a((var1x,var2) -> {
+                                return StringDecomposer.c(var2,var1x,var1) ? Optional.empty() : IChatFormatted.b;
+                            },ChatModifier.a).isPresent();
+                        };
                     }
                 });
 
