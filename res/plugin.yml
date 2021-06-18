@@ -1,6 +1,6 @@
 name: ChanLang
 main: cn.whiteg.chanlang.ChanLang
-version: 1.17.1
+version: 2.0
 api-version: 1.17
 author: MoeWhite
 commands:
