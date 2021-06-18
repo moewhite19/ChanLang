@@ -1,6 +1,5 @@
-package cn.whiteg.chanlang.allNms;
+package cn.whiteg.chanlang;
 
-import cn.whiteg.chanlang.ChanLang;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
@@ -11,22 +10,40 @@ import net.minecraft.network.chat.IChatFormatted;
 import net.minecraft.util.ChatDeserializer;
 import net.minecraft.util.FormattedString;
 import net.minecraft.util.StringDecomposer;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.Block;
+import org.bukkit.Material;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
-public class Nms_v1_17_R1 extends Nms_Reflect {
+public class LangMap {
+    private final ChanLang plugin;
+    private Method itemGetNameMethod;
+    private Method getBlockMethod;
+    private Method getItemMethod;
     private Map<String, String> map;
 
-    public Nms_v1_17_R1(ChanLang chanLang) {
-        super(chanLang);
+    public LangMap(ChanLang plugin) {
+        this.plugin = plugin;
+        try{
+//            CraftMagicNumbers
+            Class<?> craftMagicNumbersClass = Class.forName("org.bukkit.craftbukkit." + ChanLang.getServerVersion() + ".util.CraftMagicNumbers");
+            getItemMethod = craftMagicNumbersClass.getMethod("getItem",Material.class);
+            getBlockMethod = craftMagicNumbersClass.getMethod("getBlock",Material.class);
+        }catch (ClassNotFoundException | NoSuchMethodException e){
+            if (plugin.setting.debug) e.printStackTrace();
+        }
+
     }
 
     //1.17获取map
@@ -100,6 +117,28 @@ public class Nms_v1_17_R1 extends Nms_Reflect {
             e.printStackTrace();
         }
         return map;
+    }
+
+    /**
+     * 获取NMS物品
+     *
+     * @param mat 物品id
+     * @return 返回nms物品
+     */
+    public Item getNmsItem(Material mat) {
+        try{
+            Item item = (Item) getItemMethod.invoke(null,mat);
+            if (item == null){
+                Block block = (Block) getBlockMethod.invoke(null,mat);
+                if (block != null){
+                    return block.getItem();
+                }
+            }
+            return item;
+        }catch (IllegalAccessException | InvocationTargetException e){
+            e.printStackTrace();
+        }
+        return null;
     }
 
 }

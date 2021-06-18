@@ -1,8 +1,5 @@
 package cn.whiteg.chanlang;
 
-import cn.whiteg.chanlang.allNms.Nms;
-import cn.whiteg.chanlang.allNms.Nms_Reflect;
-import cn.whiteg.chanlang.allNms.Nms_v1_17_R1;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import net.minecraft.util.ChatDeserializer;
@@ -24,7 +21,7 @@ public class ChanLang extends JavaPlugin {
     public static Logger logger;
     public static ChanLang plugin;
     private static Map<String, String> map;
-    private static Nms nms;
+    private static LangMap nms;
 
     static {
         String packageName = Bukkit.getServer().getClass().getPackage().getName();
@@ -47,11 +44,7 @@ public class ChanLang extends JavaPlugin {
         return serverVersion;
     }
 
-    public static Class<?> getNmsClass(String name) throws ClassNotFoundException {
-        return Class.forName("net.minecraft.server." + getServerVersion() + "." + name);
-    }
-
-    public static Nms getNms() {
+    public static LangMap getMap() {
         return nms;
     }
 
@@ -65,16 +58,7 @@ public class ChanLang extends JavaPlugin {
         logger.info("开始加载插件");
         mainCommand = new CommandManage(this);
         mainCommand.setExecutor();
-
-        switch (serverVersion) {
-            case "v1_17_R1":
-                nms = new Nms_v1_17_R1(this);
-                break;
-            default:
-                nms = new Nms_Reflect(this);
-                break;
-        }
-
+        nms = new LangMap(this);
         map = nms.getMap();
         onReload();
         logger.info("全部加载完成");

@@ -1,5 +1,6 @@
 package cn.whiteg.chanlang;
 
+import net.minecraft.world.item.Item;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
@@ -57,11 +58,11 @@ public class LangUtils {
      * @return 名称
      */
     public static String getMaterialName(Material mat) {
-        Object item = ChanLang.getNms().getNmsItem(mat);
+        Item item = ChanLang.getMap().getNmsItem(mat);
         if (item == null){
             return mat.name();
         }
-        String key = ChanLang.getNms().getItemName(item);
+        String key = item.getName();
         if (key != null) return getMessage(key);
         return mat.name();
     }
@@ -74,11 +75,11 @@ public class LangUtils {
      * @return 名称
      */
     public static String getMaterialName(Material mat,String def) {
-        Object item = ChanLang.getNms().getNmsItem(mat);
+        Item item = ChanLang.getMap().getNmsItem(mat);
         if (item == null){
             return def;
         }
-        String key = ChanLang.getNms().getItemName(item);
+        String key = item.getName();
         if (key != null) return getMessage(key);
         return def;
     }
