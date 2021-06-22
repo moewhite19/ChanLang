@@ -58,7 +58,7 @@ public class LangUtils {
      * @return 名称
      */
     public static String getMaterialName(Material mat) {
-        Item item = ChanLang.getMap().getNmsItem(mat);
+        Item item = ChanLang.getHandler().getNmsItem(mat);
         if (item == null){
             return mat.name();
         }
@@ -75,7 +75,7 @@ public class LangUtils {
      * @return 名称
      */
     public static String getMaterialName(Material mat,String def) {
-        Item item = ChanLang.getMap().getNmsItem(mat);
+        Item item = ChanLang.getHandler().getNmsItem(mat);
         if (item == null){
             return def;
         }

@@ -1,6 +1,6 @@
 package cn.whiteg.chanlang;
 
-import com.google.common.collect.Maps;
+import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -21,20 +21,18 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
-public class LangMap {
-    private final ChanLang plugin;
-    private Method itemGetNameMethod;
+public class LangHander {
     private Method getBlockMethod;
     private Method getItemMethod;
     private Map<String, String> map;
 
-    public LangMap(ChanLang plugin) {
-        this.plugin = plugin;
+    public LangHander(ChanLang plugin) {
         try{
 //            CraftMagicNumbers
             Class<?> craftMagicNumbersClass = Class.forName("org.bukkit.craftbukkit." + ChanLang.getServerVersion() + ".util.CraftMagicNumbers");
@@ -49,36 +47,18 @@ public class LangMap {
     //1.17获取map
     public Map<String, String> getMap() {
         if (map != null) return map;
+
+        Map<String, String> builder = new HashMap<>(); //直接用builder的话，怕遇到重复key抛出异常x，还是直接用HashMap吧
         try{
-            try{
-                map = Maps.newHashMap();
-                InputStream inputstream = LocaleLanguage.class.getResourceAsStream("/assets/minecraft/lang/en_us.json");
-                Throwable throwable = null;
-                try{
-                    JsonElement jsonelement = (new Gson()).fromJson(new InputStreamReader(inputstream,StandardCharsets.UTF_8),JsonElement.class);
-                    JsonObject jsonobject = ChatDeserializer.m(jsonelement,"strings");
-                    Iterator<Map.Entry<String, JsonElement>> iterator = jsonobject.entrySet().iterator();
-                    while (iterator.hasNext()) {
-                        Map.Entry<String, JsonElement> entry = iterator.next();
-                        Pattern pattern = Pattern.compile("%(\\d+\\$)?[\\d\\.]*[df]");
-                        String s = pattern.matcher(ChatDeserializer.a(entry.getValue(),entry.getKey())).replaceAll("%$1s");
-                        map.put(entry.getKey(),s);
-                    }
-                }catch (Throwable var16){
-                    throwable = var16;
-                    throw var16;
-                } finally {
-                    if (inputstream != null){
-                        if (throwable != null){
-                            try{
-                                inputstream.close();
-                            }catch (Throwable var15){
-                                throwable.addSuppressed(var15);
-                            }
-                        } else {
-                            inputstream.close();
-                        }
-                    }
+            try (InputStream inputstream = LocaleLanguage.class.getResourceAsStream("/assets/minecraft/lang/en_us.json");){
+                JsonElement jsonelement = (new Gson()).fromJson(new InputStreamReader(inputstream,StandardCharsets.UTF_8),JsonElement.class);
+                JsonObject jsonobject = ChatDeserializer.m(jsonelement,"strings");
+                Iterator<Map.Entry<String, JsonElement>> iterator = jsonobject.entrySet().iterator();
+                while (iterator.hasNext()) {
+                    Map.Entry<String, JsonElement> entry = iterator.next();
+                    Pattern pattern = Pattern.compile("%(\\d+\\$)?[\\d\\.]*[df]");
+                    String s = pattern.matcher(ChatDeserializer.a(entry.getValue(),entry.getKey())).replaceAll("%$1s");
+                    builder.put(entry.getKey(),s);
                 }
 
                 Field f = LocaleLanguage.class.getDeclaredField("e");
@@ -116,7 +96,12 @@ public class LangMap {
         }catch (Exception e){
             e.printStackTrace();
         }
+        map = ImmutableMap.copyOf(builder);
         return map;
+    }
+
+    public void setMap(Map<String, String> map) {
+        this.map = map;
     }
 
     /**

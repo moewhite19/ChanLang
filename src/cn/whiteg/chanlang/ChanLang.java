@@ -1,7 +1,9 @@
 package cn.whiteg.chanlang;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
+import com.mojang.bridge.game.Language;
 import net.minecraft.util.ChatDeserializer;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -9,7 +11,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.io.*;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.Iterator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -20,8 +22,7 @@ public class ChanLang extends JavaPlugin {
     private static final String serverVersion;
     public static Logger logger;
     public static ChanLang plugin;
-    private static Map<String, String> map;
-    private static LangMap nms;
+    private static LangHander nms;
 
     static {
         String packageName = Bukkit.getServer().getClass().getPackage().getName();
@@ -37,14 +38,14 @@ public class ChanLang extends JavaPlugin {
 
 
     public static Map<String, String> getLangMap() {
-        return map;
+        return getHandler().getMap();
     }
 
     public static String getServerVersion() {
         return serverVersion;
     }
 
-    public static LangMap getMap() {
+    public static LangHander getHandler() {
         return nms;
     }
 
@@ -58,8 +59,7 @@ public class ChanLang extends JavaPlugin {
         logger.info("开始加载插件");
         mainCommand = new CommandManage(this);
         mainCommand.setExecutor();
-        nms = new LangMap(this);
-        map = nms.getMap();
+        nms = new LangHander(this);
         onReload();
         logger.info("全部加载完成");
     }
@@ -75,22 +75,30 @@ public class ChanLang extends JavaPlugin {
         File langDir = new File(getDataFolder(),"langs");
         saveDefaultLang(langDir);
         setting.reload();
+
+        var map = new HashMap<>(getLangMap());
         //设置语言
-        for (int i = setting.lang.size() - 1; i >= 0; i--) { //从末尾往头遍历
+        for (int i = setting.lang.size() - 1; i >= 0; i--) {
+            //从末尾往头遍历
             String lang = setting.lang.get(i);
-            File langFile = new File(langDir,lang + ".json");
-            if (langFile.exists()){
-                try{
-                    loadFile(new FileInputStream(langFile));
-                    logger.info("Load lang " + lang);
-                }catch (FileNotFoundException e){
-                    e.printStackTrace();
+            try{
+                File langFile = new File(langDir,lang + ".json");
+                if (langFile.exists()){
+                    try{
+                        loadFile(map,new FileInputStream(langFile));
+                        logger.info("Load lang " + lang);
+                    }catch (FileNotFoundException e){
+                        e.printStackTrace();
+                    }
+                } else {
+                    logger.warning("Lang not fount " + langFile.getName());
                 }
-            } else {
-                logger.warning("Lang not fount " + langFile.getName());
+            }catch (Exception e){
+                logger.warning("加载语言文件错误: " + lang);
+                e.printStackTrace();
             }
         }
-
+        getHandler().setMap(ImmutableMap.copyOf(map));
         logger.info("--加载完成--");
     }
 
@@ -128,26 +136,16 @@ public class ChanLang extends JavaPlugin {
             }catch (IOException e){
                 e.printStackTrace();
             }
-            String[] langs = new String[]{"en_us","zh_cn"};
-            for (String lang : langs) {
-            }
         }
     }
 
-    @SuppressWarnings("unchecked")
-    public void loadFile(InputStream inputstream) {
-        Map<String, String> map;
-        map = getLangMap();
+    public void loadFile(Map<String, String> map,InputStream inputstream) {
         try{
-            Pattern b = Pattern.compile("%(\\d+\\$)?[\\d\\.]*[df]");
+            Pattern b = Pattern.compile("%(\\d+\\$)?[\\d.]*[df]");
             JsonElement jsonelement = new Gson().fromJson(new InputStreamReader(inputstream,StandardCharsets.UTF_8),JsonElement.class);
             var jsonObject = ChatDeserializer.m(jsonelement,"strings");
-//                JsonObject jsonobject = (JsonObject) ccm.invoke(null,jsonelement,"strings");
-            Iterator<Map.Entry<String, JsonElement>> iterator = jsonObject.entrySet().iterator();
-            while (iterator.hasNext()) {
-                Map.Entry<String, JsonElement> entry = iterator.next();
+            for (Map.Entry<String, JsonElement> entry : jsonObject.entrySet()) {
                 var s = b.matcher(ChatDeserializer.a(entry.getValue(),entry.getKey())).replaceAll("%$1s");
-//                    String s = b.matcher((CharSequence) cca.invoke(null,entry.getValue(),entry.getKey())).replaceAll("%$1s");
                 map.put(entry.getKey(),s);
             }
         } finally {
