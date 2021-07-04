@@ -2,6 +2,7 @@ package cn.whiteg.chanlang.commands;
 
 import cn.whiteg.chanlang.ChanLang;
 import cn.whiteg.chanlang.CommandInterface;
+import com.google.common.collect.ImmutableMap;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 
@@ -12,11 +13,11 @@ public class clearall extends CommandInterface {
 
     @Override
     public boolean onCommand(CommandSender sender,Command cmd,String label,String[] args) {
-        if (!sender.hasPermission(permission)){
+        if (!canUseCommand(sender)){
             sender.sendMessage("§cNo Permission§f" + permission);
             return true;
         }
-        ChanLang.getLangMap().clear();
+        ChanLang.getHandler().setMap(ImmutableMap.of());
         sender.sendMessage("§bCleared§f");
         return true;
     }

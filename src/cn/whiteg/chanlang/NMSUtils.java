@@ -6,6 +6,7 @@ import net.minecraft.world.entity.EntityTypes;
 import org.bukkit.entity.Player;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 
 public class NMSUtils {
@@ -15,12 +16,10 @@ public class NMSUtils {
 
     public static Entity getNmsEntity(org.bukkit.entity.Entity bukkitEntity) {
         try{
-            //noinspection ResultOfMethodCallIgnored
-            bukkitEntity.getClass().getField("getHandle").get(bukkitEntity);
-        }catch (NoSuchFieldException | IllegalAccessException e){
+            return (Entity) bukkitEntity.getClass().getMethod("getHandle").invoke(bukkitEntity);
+        }catch (IllegalAccessException | NoSuchMethodException | InvocationTargetException e){
             throw new RuntimeException(new NoSuchFieldException("getHandle"));
         }
-        return null;
     }
 
     //根据类型获取Field
