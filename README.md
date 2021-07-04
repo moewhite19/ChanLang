@@ -17,7 +17,7 @@ ItemStack.getI18NDisplayName()
 | 指令  | 说明 | 需要权限 |
 | :----- | :-------------- | :---- |
 | `chanlang reload`| 重载配置和语言文件 | `chanlang.reload`<br>
-|`chanlang clearall`| 重载配置和语言文件 |`chanlang.clearall`<br>
+|`chanlang clearall`| 清空语言 |`chanlang.clearall`<br>
 |`chanlang test`| 测试语言文件指令|`chanlang.test`
 
 ##开发文档
