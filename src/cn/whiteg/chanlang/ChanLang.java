@@ -3,7 +3,6 @@ package cn.whiteg.chanlang;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
-import com.mojang.bridge.game.Language;
 import net.minecraft.util.ChatDeserializer;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -59,7 +58,7 @@ public class ChanLang extends JavaPlugin {
         logger.info("开始加载插件");
         mainCommand = new CommandManage(this);
         mainCommand.setExecutor();
-        nms = new LangHander(this);
+        nms = new LangHander();
         onReload();
         logger.info("全部加载完成");
     }

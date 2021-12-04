@@ -28,20 +28,62 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 
 public class LangHander {
-    private Method getBlockMethod;
-    private Method getItemMethod;
-    private Map<String, String> map;
+    static Method itemGetName;
+    static Method getBlockName;
+    private static Method getBlockMethod;
+    private static Method getItemMethod;
 
-    public LangHander(ChanLang plugin) {
+    static {
         try{
 //            CraftMagicNumbers
             Class<?> craftMagicNumbersClass = Class.forName("org.bukkit.craftbukkit." + ChanLang.getServerVersion() + ".util.CraftMagicNumbers");
             getItemMethod = craftMagicNumbersClass.getMethod("getItem",Material.class);
             getBlockMethod = craftMagicNumbersClass.getMethod("getBlock",Material.class);
-        }catch (ClassNotFoundException | NoSuchMethodException e){
-            if (plugin.setting.debug) e.printStackTrace();
-        }
 
+            for (Method method : Item.class.getDeclaredMethods()) {
+                if (method.getParameterTypes().length == 0 && method.getReturnType().equals(String.class) && !method.getName().startsWith("toString")){
+                    method.setAccessible(true);
+                    itemGetName = method;
+                    break;
+                }
+            }
+            for (Method method : Block.class.getDeclaredMethods()) {
+                if (method.getParameterTypes().length == 0 && method.getReturnType().equals(String.class) && !method.getName().startsWith("toString")){
+                    method.setAccessible(true);
+                    getBlockName = method;
+                    break;
+                }
+            }
+        }catch (ClassNotFoundException | NoSuchMethodException e){
+            e.printStackTrace();
+        }
+    }
+
+    private Map<String, String> map;
+
+    public LangHander() {
+    }
+
+    /**
+     * 获取NMS物品
+     *
+     * @param mat 物品id
+     * @return 返回nms物品Key
+     */
+    public static String getMaterialKey(Material mat) {
+        try{
+            Block block = (Block) getBlockMethod.invoke(null,mat);
+            if (block != null){
+                return (String) getBlockName.invoke(block);
+            }
+            Item item = (Item) getItemMethod.invoke(null,mat);
+            if (item != null){
+                return (String) itemGetName.invoke(item);
+            }
+        }catch (IllegalAccessException | InvocationTargetException e){
+            e.printStackTrace();
+        }
+        return null;
     }
 
     //1.17获取map
@@ -61,7 +103,7 @@ public class LangHander {
                     builder.put(entry.getKey(),s);
                 }
 
-                Field f = LocaleLanguage.class.getDeclaredField("e");
+                Field f = NMSUtils.getFieldFormType(LocaleLanguage.class,LocaleLanguage.class);
                 f.setAccessible(true);
                 f.set(null,new LocaleLanguage() {
                     @Override
@@ -102,28 +144,6 @@ public class LangHander {
 
     public void setMap(Map<String, String> map) {
         this.map = map;
-    }
-
-    /**
-     * 获取NMS物品
-     *
-     * @param mat 物品id
-     * @return 返回nms物品
-     */
-    public Item getNmsItem(Material mat) {
-        try{
-            Item item = (Item) getItemMethod.invoke(null,mat);
-            if (item == null){
-                Block block = (Block) getBlockMethod.invoke(null,mat);
-                if (block != null){
-                    return block.getItem();
-                }
-            }
-            return item;
-        }catch (IllegalAccessException | InvocationTargetException e){
-            e.printStackTrace();
-        }
-        return null;
     }
 
 }

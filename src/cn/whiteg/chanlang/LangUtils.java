@@ -1,6 +1,5 @@
 package cn.whiteg.chanlang;
 
-import net.minecraft.world.item.Item;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
@@ -11,6 +10,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffectType;
 
 public class LangUtils {
+
     /**
      * 获取附魔效果名称
      *
@@ -58,13 +58,7 @@ public class LangUtils {
      * @return 名称
      */
     public static String getMaterialName(Material mat) {
-        Item item = ChanLang.getHandler().getNmsItem(mat);
-        if (item == null){
-            return mat.name();
-        }
-        String key = item.getName();
-        if (key != null) return getMessage(key);
-        return mat.name();
+        return getMaterialName(mat,mat.name());
     }
 
     /**
@@ -75,12 +69,11 @@ public class LangUtils {
      * @return 名称
      */
     public static String getMaterialName(Material mat,String def) {
-        Item item = ChanLang.getHandler().getNmsItem(mat);
-        if (item == null){
-            return def;
+        try{
+            var key = LangHander.getMaterialKey(mat);
+            if (key != null) return getMessage(key);
+        }catch (Exception e){
         }
-        String key = item.getName();
-        if (key != null) return getMessage(key);
         return def;
     }
 
