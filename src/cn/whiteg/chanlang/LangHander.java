@@ -10,6 +10,7 @@ import net.minecraft.network.chat.IChatFormatted;
 import net.minecraft.util.ChatDeserializer;
 import net.minecraft.util.FormattedString;
 import net.minecraft.util.StringDecomposer;
+import net.minecraft.util.Unit;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import org.bukkit.Material;
@@ -32,6 +33,7 @@ public class LangHander {
     static Method getBlockName;
     private static Method getBlockMethod;
     private static Method getItemMethod;
+    private static Optional<Unit> chatFormUnit;
 
     static {
         try{
@@ -54,6 +56,16 @@ public class LangHander {
                     break;
                 }
             }
+
+            try{
+                final Field field = NMSUtils.getFieldFormType(IChatFormatted.class,Optional.class);
+                //noinspection unchecked
+                chatFormUnit = (Optional<Unit>) field.get(null);
+            }catch (NoSuchFieldException | IllegalAccessException e){
+                throw new RuntimeException(e);
+            }
+
+
         }catch (ClassNotFoundException | NoSuchMethodException e){
             e.printStackTrace();
         }
@@ -107,6 +119,11 @@ public class LangHander {
                 f.setAccessible(true);
                 f.set(null,new LocaleLanguage() {
                     @Override
+                    public String a(String key, String fallback) {
+                        return map.getOrDefault(key, fallback);
+                    }
+
+                    @Override
                     public String a(String s) {
                         return map.getOrDefault(s,s);
                     }
@@ -125,7 +142,7 @@ public class LangHander {
                     public FormattedString a(IChatFormatted iChatFormatted) {
                         return (var1) -> {
                             return iChatFormatted.a((var1x,var2) -> {
-                                return StringDecomposer.c(var2,var1x,var1) ? Optional.empty() : IChatFormatted.b;
+                                return StringDecomposer.c(var2,var1x,var1) ? Optional.empty() : chatFormUnit;
                             },ChatModifier.a).isPresent();
                         };
                     }
