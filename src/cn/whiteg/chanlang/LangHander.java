@@ -37,8 +37,13 @@ public class LangHander {
 
     static {
         try{
-//            CraftMagicNumbers
-            Class<?> craftMagicNumbersClass = Class.forName("org.bukkit.craftbukkit." + ChanLang.getServerVersion() + ".util.CraftMagicNumbers");
+            Class<?> craftMagicNumbersClass;
+
+            try{
+                craftMagicNumbersClass = Class.forName("org.bukkit.craftbukkit.util.CraftMagicNumbers");
+            }catch (ClassNotFoundException e){
+                craftMagicNumbersClass = Class.forName("org.bukkit.craftbukkit." + ChanLang.getServerVersion() + ".util.CraftMagicNumbers");
+            }
             getItemMethod = craftMagicNumbersClass.getMethod("getItem",Material.class);
             getBlockMethod = craftMagicNumbersClass.getMethod("getBlock",Material.class);
 
